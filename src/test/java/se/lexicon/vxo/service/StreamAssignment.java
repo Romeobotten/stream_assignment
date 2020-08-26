@@ -55,7 +55,8 @@ public class StreamAssignment {
         long amount = 0;
         int expected = 90;
 
-        amount = people.stream().map(Person::getLastName)
+        amount = people.stream()
+                .map(Person::getLastName)
                 .filter(p -> p.equals("Andersson"))
                 .count();
 
@@ -136,14 +137,13 @@ public class StreamAssignment {
      * Using min() define a comparator that extracts the oldest person i the list as an Optional
      */
     @Test
-    public void task8(){
+    public void task8(){  // -OK
         LocalDate expectedBirthDate = LocalDate.parse("1910-01-02");
 
         Optional<Person> optional = null;
 
-        //Write code here
-
-        people.stream().findAny();
+        optional = people.stream()
+                .min((p1,p2) -> p1.getDateOfBirth().compareTo(p2.getDateOfBirth()));
 
         assertNotNull(optional);
         assertEquals(expectedBirthDate, optional.get().getDateOfBirth());
@@ -153,13 +153,19 @@ public class StreamAssignment {
      * Map each person born before 1920-01-01 into a PersonDto object then extract to a List
      */
     @Test
-    public void task9(){
+    public void task9(){ //  -OK
         int expectedSize = 892;
         LocalDate date = LocalDate.parse("1920-01-01");
 
         List<PersonDto> dtoList = null;
 
-        //Write code here
+        dtoList = people.stream()
+                .filter(p -> p.getDateOfBirth().isBefore(date))
+        .map(p -> {
+            PersonDto d = new PersonDto(p.getPersonId(),p.getFirstName() +" " +  p.getLastName());
+                    return d;
+                })
+        .collect(Collectors.toList());
 
         assertNotNull(dtoList);
         assertEquals(expectedSize, dtoList.size());
@@ -170,13 +176,19 @@ public class StreamAssignment {
      * return the string.
      */
     @Test
-    public void task10(){
+    public void task10(){ // -OK
         String expected = "WEDNESDAY 19 DECEMBER 2012";
         int personId = 5914;
 
         Optional<String> optional = null;
-
         //Write code here
+
+        optional = people.stream()
+                .filter(p -> p.getPersonId() == (personId))
+                .map(p -> p.getDateOfBirth().getDayOfWeek().toString() + " " + p.getDateOfBirth().getDayOfMonth() +
+                        " " + p.getDateOfBirth().getMonth().toString() + " " + p.getDateOfBirth().getYear())
+                .peek(System.out::println)
+                .findFirst();
 
         assertNotNull(optional);
         assertTrue(optional.isPresent());
