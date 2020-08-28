@@ -10,6 +10,7 @@ import java.time.Period;
 import java.util.*;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -181,7 +182,6 @@ public class StreamAssignment {
         int personId = 5914;
 
         Optional<String> optional = null;
-        //Write code here
 
         optional = people.stream()
                 .filter(p -> p.getPersonId() == (personId))
@@ -200,13 +200,15 @@ public class StreamAssignment {
      * changing type of stream to an IntStream.
      */
     @Test
-    public void task11(){
+    public void task11(){   //  -OK
         ToIntFunction<Person> personToAge =
                 person -> Period.between(person.getDateOfBirth(), LocalDate.parse("2019-12-20")).getYears();
         double expected = 54.42;
         double averageAge = 0;
 
-        //Write code here
+        averageAge = people.stream()
+                .mapToInt(personToAge)
+                .average().getAsDouble();
 
         assertTrue(averageAge > 0);
         assertEquals(expected, averageAge, .01);
@@ -216,12 +218,18 @@ public class StreamAssignment {
      * Extract from people a sorted string array of all firstNames that are palindromes. No duplicates
      */
     @Test
-    public void task12(){
+    public void task12(){   //  -OK
         String[] expected = {"Ada", "Ana", "Anna", "Ava", "Aya", "Bob", "Ebbe", "Efe", "Eje", "Elle", "Hannah", "Maram", "Natan", "Otto"};
 
         String[] result = null;
 
-        //Write code here
+        result = people.stream()
+
+                .filter(p -> p.getFirstName().equalsIgnoreCase(new StringBuilder(p.getFirstName()).reverse().toString())) // Filter persons that have palindrome names
+                .map(Person::getFirstName)
+                .sorted()
+                .distinct()  // Distinct should be before sorted?
+                .toArray(String[]::new);
 
         assertNotNull(result);
         assertArrayEquals(expected, result);
@@ -231,11 +239,28 @@ public class StreamAssignment {
      * Extract from people a map where each key is a last name with a value containing a list of all that has that lastName
      */
     @Test
-    public void task13(){
+    public void task13(){ //  -OK
         int expectedSize = 107;
         Map<String, List<Person>> personMap = null;
-
+        List<Person> personList = null;
+        String lastName = null;
         //Write code here
+
+
+        personMap = people.stream()
+                .collect(Collectors.groupingBy(Person::getLastName)); // Not very funny, is it?
+
+//        people.stream()
+//                .map(p -> {
+//                    if(p.getLastName().equals(lastName)) {
+//                        personList.add(p);
+//                    } else {
+//                        lastName = p.getLastName();
+//                        personList = null;
+//                        personList.add(p);
+//                    }
+//                    return personMap.put(p.getLastName(),personList);
+//                });
 
         assertNotNull(personMap);
         assertEquals(expectedSize, personMap.size());
@@ -245,16 +270,20 @@ public class StreamAssignment {
      * Create a calendar using Stream.iterate of year 2020. Extract to a LocalDate array
      */
     @Test
-    public void task14(){
-        LocalDate[] _2020_dates = null;
+    public void task14(){   //   -OK
 
         //Write code here
+        LocalDate[] _2020_dates;
 
+            _2020_dates = Stream.iterate(1, i -> i + 1)
+                .limit(366)
+                .map(y -> LocalDate.ofYearDay(2020,y.intValue()))
+                .peek(System.out::println)
+                .toArray(LocalDate[]::new);
 
         assertNotNull(_2020_dates);
         assertEquals(366, _2020_dates.length);
         assertEquals(LocalDate.parse("2020-01-01"), _2020_dates[0]);
         assertEquals(LocalDate.parse("2020-12-31"), _2020_dates[_2020_dates.length-1]);
     }
-
 }
